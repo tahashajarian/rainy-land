@@ -117,11 +117,12 @@ class Land {
   }
 
   addMeshes() {
-    const geometry = new THREE.PlaneGeometry(16, 16, 128, 128);
+    const geometry = new THREE.PlaneGeometry(16, 16, 1280, 1280);
     const grassTexture = this.textureLoader.load('/textures/grass/color.jpg')
     const material = new THREE.ShaderMaterial({
       vertexShader: vertextGround,
       fragmentShader: fragGround,
+      // wireframe: true,
       side: THREE.DoubleSide,
       uniforms: {
         uTexture: {
