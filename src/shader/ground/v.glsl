@@ -14,7 +14,7 @@ void main() {
   // float sinX = sin(modelPosition.x * uFrequence + (uTime * uSpeedWave)) * aRandom;
   // float cosX = cos(modelPosition.z * uFrequence + (uTime * uSpeedWave)) * aRandom;
   // modelPosition.y = mod(1.,sinX + cosX + aRandom) * uHeightWave * aRandom;
-  modelPosition.y += textureColor.y;
+  modelPosition.y += textureColor.y * 1.5;
   vec4 viewPosition = viewMatrix * modelPosition;
   vec4 projectedPosition = projectionMatrix * viewPosition;
 
