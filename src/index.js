@@ -7,6 +7,10 @@ import {
   Sky
 } from 'three/examples/jsm/objects/Sky';
 
+import {
+  GLTFLoader
+} from 'three/examples/jsm/loaders/GLTFLoader';
+
 import * as dat from 'dat.gui';
 
 import vertextGround from './shader/ground/v.glsl'
@@ -22,6 +26,8 @@ class Land {
     this.addMeshes();
     this.handleEvents()
     this.addLight();
+    this.addHome();
+    this.addRain();
     //
     this.tick();
   }
@@ -38,7 +44,7 @@ class Land {
     this.renderer = new THREE.WebGLRenderer({
       canvas: this.canvas,
       antialias: true,
-      alpha: true
+      // alpha: true
     })
     // document.body.append(this.renderer.domElement)
     this.renderer.setSize(window.innerWidth, window.innerHeight);
@@ -49,9 +55,14 @@ class Land {
     this.controls.maxDistance = 100;
     this.controls.maxPolarAngle = Math.PI / 2 - .1;
     this.textureLoader = new THREE.TextureLoader();
-    this.scene.background = new THREE.Color(0xaaaaff);
+    // this.scene.background = new THREE.Color(0xaaaaff);
     // this.renderer.setClearColor(0xffffff, 1)
     this.gui = new dat.GUI();
+    this.clock = new THREE.Clock()
+    const fogColor = new THREE.Color(0xffffff);
+
+    // this.scene.background = fogColor;
+    // this.scene.fog = new THREE.Fog(fogColor, 0.0025, 20);
 
   }
 
@@ -117,7 +128,7 @@ class Land {
   }
 
   addMeshes() {
-    const geometry = new THREE.PlaneGeometry(16, 16, 128, 128);
+    const geometry = new THREE.PlaneGeometry(64, 64, 128, 128);
     const grassTexture = this.textureLoader.load('/textures/perlin-noise.png')
     const material = new THREE.ShaderMaterial({
       vertexShader: vertextGround,
@@ -127,30 +138,89 @@ class Land {
       uniforms: {
         uTexture: {
           value: grassTexture
+        },
+        uTime: {
+          value: 0
+        },
+        uFrequence: {
+          value: .1,
+        },
+        uSpeedWave: {
+          value: 1.,
         }
       }
     });
-    const plane = new THREE.Mesh(geometry, material);
-    plane.rotation.x = -Math.PI / 2;
+    this.plane = new THREE.Mesh(geometry, material);
+    this.plane.rotation.x = -Math.PI / 2;
 
-    this.scene.add(plane);
+    this.scene.add(this.plane);
   }
 
   addLight() {
     let light = new THREE.DirectionalLight(0x808080, 1, 100);
-    light.position.set(-100, 100, -100);
+    light.position.set(-100, 50, -100);
     light.target.position.set(0, 0, 0);
     light.castShadow = false;
     this.scene.add(light, new THREE.DirectionalLightHelper(light, 5));
 
     light = new THREE.DirectionalLight(0x404040, 1, 100);
-    light.position.set(100, 100, -100);
+    light.position.set(100, 50, -100);
     light.target.position.set(0, 0, 0);
     light.castShadow = false;
     this.scene.add(light, new THREE.DirectionalLightHelper(light, 5));
 
   }
 
+
+
+  addRain() {
+    const particleTexture = this.textureLoader.load('/textures/particles/12.png')
+    const particlesGeometry = new THREE.BufferGeometry()
+    const count = 50000;
+
+    const positions = new Float32Array(count * 3)
+    const colors = new Float32Array(count * 3)
+
+    for (let i = 0; i < count * 3; i++) {
+      positions[i] = (Math.random() - 0.5) * 64
+      colors[i] = Math.random()
+    }
+
+    particlesGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
+    // particlesGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3))
+
+    // Material
+    const particlesMaterial = new THREE.PointsMaterial()
+
+    particlesMaterial.size = 0.2
+    particlesMaterial.sizeAttenuation = true
+
+    particlesMaterial.color = new THREE.Color('#ff88cc')
+
+    particlesMaterial.transparent = true
+    particlesMaterial.alphaMap = particleTexture
+    // particlesMaterial.alphaTest = 0.01
+    // particlesMaterial.depthTest = false
+    particlesMaterial.depthWrite = false
+    particlesMaterial.blending = THREE.AdditiveBlending
+
+    particlesMaterial.vertexColors = true
+
+    // Points
+    this.particles = new THREE.Points(particlesGeometry, particlesMaterial)
+    this.scene.add(this.particles)
+  }
+
+  addHome() {
+    this.gltflLoder = new GLTFLoader();
+    this.gltflLoder.load('/models/house2.glb', (model) => {
+      for (let i = 0; i <= model.scene.children.length; i++) {
+        const child = model.scene.children[i]
+        child.position.y += 3
+        this.scene.add(child)
+      }
+    })
+  }
   handleEvents() {
     window.addEventListener('resize', () => {
 
@@ -168,7 +238,12 @@ class Land {
   tick() {
     requestAnimationFrame(this.tick.bind(this))
     this.renderer.render(this.scene, this.camera);
+    this.plane.material.uniforms.uTime.value = this.clock.getElapsedTime();
+    this.particles.position.y -= 0.08
+    if (this.particles.position.y <= 0) {
+      this.particles.position.y = 31
 
+    }
   }
 
 }
