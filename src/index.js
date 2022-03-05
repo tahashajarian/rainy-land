@@ -21,7 +21,7 @@ class Land {
   constructor() {
     this.configures()
     this.init();
-    this.initSky();
+    // this.initSky();
     this.creatEnviroment();
     this.addMeshes();
     this.handleEvents()
@@ -202,8 +202,8 @@ class Land {
     particlesMaterial.alphaMap = particleTexture
     // particlesMaterial.alphaTest = 0.01
     // particlesMaterial.depthTest = false
-    particlesMaterial.depthWrite = false
-    // particlesMaterial.blending = THREE.AdditiveBlending
+    // particlesMaterial.depthWrite = false
+    particlesMaterial.blending = THREE.CustomBlending
 
     particlesMaterial.vertexColors = true
 
