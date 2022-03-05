@@ -21,7 +21,7 @@ class Land {
   constructor() {
     this.configures()
     this.init();
-    // this.initSky();
+    this.initSky();
     this.creatEnviroment();
     this.addMeshes();
     this.handleEvents()
@@ -39,8 +39,8 @@ class Land {
   init() {
     this.scene = new THREE.Scene();
     this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 200);
-    this.camera.position.z = 5;
-    this.camera.position.y = 5;
+    this.camera.position.z = 15;
+    this.camera.position.y = 15;
     this.renderer = new THREE.WebGLRenderer({
       canvas: this.canvas,
       antialias: true,
@@ -174,6 +174,7 @@ class Land {
 
 
   addRain() {
+    console.log('add raind')
     const particleTexture = this.textureLoader.load('/textures/particles/12.png')
     const particlesGeometry = new THREE.BufferGeometry()
     const count = 50000;
@@ -202,12 +203,13 @@ class Land {
     // particlesMaterial.alphaTest = 0.01
     // particlesMaterial.depthTest = false
     particlesMaterial.depthWrite = false
-    particlesMaterial.blending = THREE.AdditiveBlending
+    // particlesMaterial.blending = THREE.AdditiveBlending
 
     particlesMaterial.vertexColors = true
 
     // Points
     this.particles = new THREE.Points(particlesGeometry, particlesMaterial)
+    console.log(this.particles)
     this.scene.add(this.particles)
   }
 
